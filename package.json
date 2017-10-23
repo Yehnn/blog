@@ -1,33 +1,36 @@
 {
-  "name": "gitment",
-  "version": "0.0.3",
-  "description": "A comment system based on GitHub Issues",
+  "name": "jeasons-blog",
+  "version": "1.0.0",
+  "description": "Jeason's Personal Blog",
   "main": "./dist/gitment.js",
   "author": {
-    "name": "Shiquan Sun",
-    "url": "https://github.com/imsun"
+    "name": "Jeason",
+    "url": "https://github.com/jeasonstudio"
   },
   "keywords": [
-    "comment system",
-    "GitHub Issues"
+    "Jeason",
+    "JeasonStudio",
+    "blog"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imsun/gitment"
+    "url": "https://github.com/jeasonstudio/blog"
   },
   "bugs": {
-    "url": "https://github.com/imsun/gitment/issues"
+    "url": "https://github.com/jeasonstudio/blog"
   },
-  "homepage": "https://github.com/imsun/gitment",
+  "homepage": "https://jeasonstudio.github.io/blog/",
   "scripts": {
     "build": "babel src --out-dir dist --ignore test.js --source-maps & NODE_ENV=production webpack --config webpack.config.js --progress --profile --colors",
-    "dev": "webpack-dev-server --config webpack.dev.config.js --host 0.0.0.0 --progress --profile --colors"
+    "dev": "webpack-dev-server --config webpack.dev.config.js --host 0.0.0.0 --progress --profile --colors",
+    "start": "http-server -p 3000"
   },
   "devDependencies": {
     "babel-cli": "^6.24.0",
     "babel-core": "^6.24.0",
     "babel-loader": "^6.4.1",
     "babel-preset-es2015": "^6.24.0",
+    "http-server": "^0.10.0",
     "webpack": "^2.3.2",
     "webpack-dev-server": "^2.4.2"
   },
