@@ -58,6 +58,7 @@ class Gitment {
       oauth: {},
       perPage: 20,
       maxCommentHeight: 250,
+      issueId: '',
     }, options)
 
     this.useTheme(this.theme)
@@ -185,7 +186,10 @@ class Gitment {
   }
 
   loadMeta() {
-    const { id, owner, repo, oauth: { client_id, client_secret } } = this
+    const { id, owner, repo, oauth: { client_id, client_secret }, issueId } = this
+    if (typeof issueId !== 'string') {
+      throw new Error('issueId must be a string')
+    }
     return http.get(`/repos/${owner}/${repo}/issues`, {
         creator: owner,
         labels: id,
@@ -194,8 +198,12 @@ class Gitment {
       })
       .then(issues => {
         if (!issues.length) return Promise.reject(NOT_INITIALIZED_ERROR)
-        this.state.meta = issues[0]
-        return issues[0]
+        let thisIssue = issues[0]
+        if (issueId) {
+          thisIssue = issues.find(({ id }) => String(id) === issueId) || thisIssue
+        }
+        this.state.meta = thisIssue
+        return thisIssue
       })
   }
 

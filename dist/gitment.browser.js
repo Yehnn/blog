@@ -4052,7 +4052,8 @@ var Gitment = function () {
       theme: _default2.default,
       oauth: {},
       perPage: 20,
-      maxCommentHeight: 250
+      maxCommentHeight: 250,
+      issueId: ''
     }, options);
 
     this.useTheme(this.theme);
@@ -4221,8 +4222,12 @@ var Gitment = function () {
           repo = this.repo,
           _oauth3 = this.oauth,
           client_id = _oauth3.client_id,
-          client_secret = _oauth3.client_secret;
+          client_secret = _oauth3.client_secret,
+          issueId = this.issueId;
 
+      if (typeof issueId !== 'string') {
+        throw new Error('issueId must be a string');
+      }
       return _utils.http.get('/repos/' + owner + '/' + repo + '/issues', {
         creator: owner,
         labels: id,
@@ -4230,8 +4235,15 @@ var Gitment = function () {
         client_secret: client_secret
       }).then(function (issues) {
         if (!issues.length) return Promise.reject(_constants.NOT_INITIALIZED_ERROR);
-        _this7.state.meta = issues[0];
-        return issues[0];
+        var thisIssue = issues[0];
+        if (issueId) {
+          thisIssue = issues.find(function (_ref) {
+            var id = _ref.id;
+            return String(id) === issueId;
+          }) || thisIssue;
+        }
+        _this7.state.meta = thisIssue;
+        return thisIssue;
       });
     }
   }, {
