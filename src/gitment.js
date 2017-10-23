@@ -150,12 +150,14 @@ class Gitment {
   }
 
   createIssue() {
-    const { id, owner, repo, title, link, desc, labels } = this
+    const { id, owner, repo, title, link, desc, labels, oauth: { client_id, client_secret } } = this
 
     return http.post(`/repos/${owner}/${repo}/issues`, {
       title,
       labels: labels.concat(['gitment', id]),
       body: `${link}\n\n${desc}`,
+      client_id,
+      client_secret,
     })
       .then((meta) => {
         this.state.meta = meta
@@ -183,10 +185,12 @@ class Gitment {
   }
 
   loadMeta() {
-    const { id, owner, repo } = this
+    const { id, owner, repo, oauth: { client_id, client_secret } } = this
     return http.get(`/repos/${owner}/${repo}/issues`, {
         creator: owner,
         labels: id,
+        client_id,
+        client_secret,
       })
       .then(issues => {
         if (!issues.length) return Promise.reject(NOT_INITIALIZED_ERROR)
@@ -196,8 +200,14 @@ class Gitment {
   }
 
   loadComments(page = this.state.currentPage) {
+    const { client_id, client_secret } = this.oauth
     return this.getIssue()
-      .then(issue => http.get(issue.comments_url, { page, per_page: this.perPage }, ''))
+      .then(issue => http.get(issue.comments_url, {
+        page,
+        per_page: this.perPage,
+        client_id,
+        client_secret,
+      }, ''))
       .then((comments) => {
         this.state.comments = comments
         return comments
@@ -247,8 +257,10 @@ class Gitment {
     return Promise.all(comments.map((comment) => {
       if (!comment.reactions.total_count) return []
 
-      const { owner, repo } = this
-      return http.get(`/repos/${owner}/${repo}/issues/comments/${comment.id}/reactions`, {})
+      const { owner, repo, oauth: { client_id, client_secret } } = this
+      return http.get(`/repos/${owner}/${repo}/issues/comments/${comment.id}/reactions`, {
+        client_id, client_secret,
+      })
     }))
       .then(reactionsArray => {
         comments.forEach((comment, index) => {
@@ -282,10 +294,12 @@ class Gitment {
       return Promise.reject()
     }
 
-    const { owner, repo } = this
+    const { owner, repo, oauth: { client_id, client_secret } } = this
 
     return http.post(`/repos/${owner}/${repo}/issues/${this.state.meta.number}/reactions`, {
       content: 'heart',
+      client_id,
+      client_secret
     })
       .then(reaction => {
         this.state.reactions.push(reaction)
@@ -312,11 +326,13 @@ class Gitment {
       return Promise.reject()
     }
 
-    const { owner, repo } = this
+    const { owner, repo, oauth: { client_id, client_secret } } = this
     const comment = this.state.comments.find(comment => comment.id === commentId)
 
     return http.post(`/repos/${owner}/${repo}/issues/comments/${commentId}/reactions`, {
       content: 'heart',
+      client_id,
+      client_secret,
     })
       .then(reaction => {
         this.state.commentReactions[commentId].push(reaction)
@@ -329,7 +345,8 @@ class Gitment {
 
     const reactions = this.state.commentReactions[commentId]
     const comment = this.state.comments.find(comment => comment.id === commentId)
-    const { user } = this.state
+    const { state: { user }, oauth: { client_id, client_secret } } = this
+
     const index = reactions.findIndex(reaction => reaction.user.login === user.login)
 
     return http.delete(`/reactions/${reactions[index].id}`)

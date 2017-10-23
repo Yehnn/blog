@@ -198,13 +198,18 @@ var Gitment = function () {
           title = this.title,
           link = this.link,
           desc = this.desc,
-          labels = this.labels;
+          labels = this.labels,
+          _oauth2 = this.oauth,
+          client_id = _oauth2.client_id,
+          client_secret = _oauth2.client_secret;
 
 
       return _utils.http.post('/repos/' + owner + '/' + repo + '/issues', {
         title: title,
         labels: labels.concat(['gitment', id]),
-        body: link + '\n\n' + desc
+        body: link + '\n\n' + desc,
+        client_id: client_id,
+        client_secret: client_secret
       }).then(function (meta) {
         _this5.state.meta = meta;
         return meta;
@@ -240,11 +245,16 @@ var Gitment = function () {
 
       var id = this.id,
           owner = this.owner,
-          repo = this.repo;
+          repo = this.repo,
+          _oauth3 = this.oauth,
+          client_id = _oauth3.client_id,
+          client_secret = _oauth3.client_secret;
 
       return _utils.http.get('/repos/' + owner + '/' + repo + '/issues', {
         creator: owner,
-        labels: id
+        labels: id,
+        client_id: client_id,
+        client_secret: client_secret
       }).then(function (issues) {
         if (!issues.length) return Promise.reject(_constants.NOT_INITIALIZED_ERROR);
         _this7.state.meta = issues[0];
@@ -257,9 +267,17 @@ var Gitment = function () {
       var _this8 = this;
 
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.state.currentPage;
+      var _oauth4 = this.oauth,
+          client_id = _oauth4.client_id,
+          client_secret = _oauth4.client_secret;
 
       return this.getIssue().then(function (issue) {
-        return _utils.http.get(issue.comments_url, { page: page, per_page: _this8.perPage }, '');
+        return _utils.http.get(issue.comments_url, {
+          page: page,
+          per_page: _this8.perPage,
+          client_id: client_id,
+          client_secret: client_secret
+        }, '');
       }).then(function (comments) {
         _this8.state.comments = comments;
         return comments;
@@ -316,9 +334,14 @@ var Gitment = function () {
         if (!comment.reactions.total_count) return [];
 
         var owner = _this11.owner,
-            repo = _this11.repo;
+            repo = _this11.repo,
+            _oauth5 = _this11.oauth,
+            client_id = _oauth5.client_id,
+            client_secret = _oauth5.client_secret;
 
-        return _utils.http.get('/repos/' + owner + '/' + repo + '/issues/comments/' + comment.id + '/reactions', {});
+        return _utils.http.get('/repos/' + owner + '/' + repo + '/issues/comments/' + comment.id + '/reactions', {
+          client_id: client_id, client_secret: client_secret
+        });
       })).then(function (reactionsArray) {
         comments.forEach(function (comment, index) {
           comentReactions[comment.id] = reactionsArray[index];
@@ -358,11 +381,16 @@ var Gitment = function () {
       }
 
       var owner = this.owner,
-          repo = this.repo;
+          repo = this.repo,
+          _oauth6 = this.oauth,
+          client_id = _oauth6.client_id,
+          client_secret = _oauth6.client_secret;
 
 
       return _utils.http.post('/repos/' + owner + '/' + repo + '/issues/' + this.state.meta.number + '/reactions', {
-        content: 'heart'
+        content: 'heart',
+        client_id: client_id,
+        client_secret: client_secret
       }).then(function (reaction) {
         _this12.state.reactions.push(reaction);
         _this12.state.meta.reactions.heart++;
@@ -398,14 +426,19 @@ var Gitment = function () {
       }
 
       var owner = this.owner,
-          repo = this.repo;
+          repo = this.repo,
+          _oauth7 = this.oauth,
+          client_id = _oauth7.client_id,
+          client_secret = _oauth7.client_secret;
 
       var comment = this.state.comments.find(function (comment) {
         return comment.id === commentId;
       });
 
       return _utils.http.post('/repos/' + owner + '/' + repo + '/issues/comments/' + commentId + '/reactions', {
-        content: 'heart'
+        content: 'heart',
+        client_id: client_id,
+        client_secret: client_secret
       }).then(function (reaction) {
         _this14.state.commentReactions[commentId].push(reaction);
         comment.reactions.heart++;
@@ -420,7 +453,11 @@ var Gitment = function () {
       var comment = this.state.comments.find(function (comment) {
         return comment.id === commentId;
       });
-      var user = this.state.user;
+      var user = this.state.user,
+          _oauth8 = this.oauth,
+          client_id = _oauth8.client_id,
+          client_secret = _oauth8.client_secret;
+
 
       var index = reactions.findIndex(function (reaction) {
         return reaction.user.login === user.login;
